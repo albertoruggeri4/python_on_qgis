@@ -10,8 +10,10 @@ os.chdir('D:/LAB2')
 #effettuiamo lo stesso procedimento visto precedentemente
 #Apriamo il file tif - otteniamo la proiezione - trasforma il SR
 raster = gdal.Open('montecristo_sentinel.tif') 
+
 proj = raster.GetProjection()  
 trans = raster.GetGeoTransform()
+
 #estraggo le dimensioni di x e y - Raster..Size
 x = raster.RasterXSize 
 y = raster.RasterYSize
