@@ -1,0 +1,27 @@
+import gdal
+import os
+import numpy
+
+os.chdir ("D:/LAB2")
+
+sentinel = gdal.Open('montecristo_sentinel.tif')
+#banda n3 è il rosso banda n4 NIR, apro come prima con get 
+
+banda_red = sentinel.GetRasterBand(3)
+banda_nir = sentinel.GetRasterBand(4)
+banda_red_arr = banda_red.ReadAsArray()
+banda_nir_arr = banda_nir.ReadAsArray()
+print(banda_red_arr)
+
+#si calcola facendo differenza NIR-R /R+NIR
+
+NDVI =(banda_nir_arr-banda_red_arr)/(banda_nir_arr+banda_red_arr)
+
+#andiamo a fare ora un raster nuovo, funzione per cambio formato e poi riempire il driver
+driver = gdal.GetDriverByName('GTiff')
+#dimensioni x e y - li so perchè sono gli stessi del raster in entrata (dopo nome output), l'ultima è la tipologia file che vedremo dopo
+x= sentinel.RasterXSize
+y= sentinel.RasterYSize
+out_raster = driver.Create('montecristo_ndvi.tif', x, y, 1, gdal.GDT_Float32) 
+
+#scrittura array dentro questo file
