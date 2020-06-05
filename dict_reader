@@ -1,0 +1,49 @@
+#DICT READER
+
+import csv
+#mettere in comunicazione la shell di py con il os -- os.chdir
+import os
+
+os.getcwd()
+os.chdir('D:\LAB2')
+
+#apro il file utilizzando DictReader in questo modo mi legge il csv utilizzando il dizionario (capitolo 10 del libro per chi volesse approfondire)
+csvfile_read = open('coordinate_punti.csv','r')   
+tabella = csv.DictReader (csvfile_read, delimiter=',')
+for row in tabella:
+    quota = int(row['height']) #mi permette di utilizzare il valore della prima linea come indice
+    print(quota)
+########################################################################
+#
+# Aggiungo una colonna
+#
+########################################################################
+
+#apro il file csv utilizzando csv.reader
+csvfile_read = open('coordinate_punti.csv','r')   
+tabella = csv.reader (csvfile_read, delimiter=',')
+fields = ['id', 'xcoord', 'ycoord', 'height', 'elips height'] #riscrivo gli headers con quello della colonna che voglio aggiungere
+lista = [] #preparo sempre la lista vuota che andrò a popolare nel ciclo for
+for row in tabella:  #ciclo ogni riga del mio file csv
+    
+#creo un blocco try/except in modo che se il programma riscontra un errore nell'esecuzione di try passa a eseguire il comando in except
+#ATTENZIONE l'utilizzo di un blocco try può rendere difficoltosa l'individuazione di un errore come abbiamo visto anche a lezione quando
+#veniva creata una lista vuota perchè la condizione in try non si verificava mai senza errore
+    try:
+        elips = int(row[3]) + 45 #partendo dalla colonna contentente la quota ortometrica vado ad aggiungere 45m che è l'ondulazione geoidica nella zona dei nosti punti
+                                 #se non vi ricordate cose sono queste cose ricontrolalre appunti di cartografia numerica (sperando di non aver sbagliato anche io o detto cavolate)
+        row.append(elips)  #aggiungo in valore elips ad ogni riga della mia tabella (vi ricordo che utilizzando csv.reader e ciclando attraverso tutte le righe queste saranno appunto delle liste)
+        lista.append(row)  #aggiungo la mia riga (a cui ho "appeso" prima il valore di elips) alla famosa "lista di liste"
+    except:
+        pass  #se eseguendo i comandi in try il programma riscontra un errore (es. prima riga dove cerca di trasformare in intero una strinag composta da lettere)
+              #esegui il comando pass che fa andare avanti il programma senza fare nulla facendo ricominciare il ciclo for
+
+#creo un nuovo file csv in cui inserirò i nuovi header e lo apro come csv.writer
+csvfile_write = open('coordinate_punti_new_col.csv','w') 
+writer = csv.writer(csvfile_write)
+writer.writerow(fields) #scrivo la prima riga con gli header nuovi che ho scritto in precedenza
+writer.writerows(lista) #scrivo le altre righe immagazzinate dal ciclo for nella "lista di liste"
+# chiudo i file
+csvfile_read.close()
+csvfile_write.close()
+  
