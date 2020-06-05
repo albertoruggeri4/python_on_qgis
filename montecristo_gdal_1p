@@ -1,0 +1,95 @@
+import gdal
+import os
+import numpy
+
+
+os.chdir("D:/LAB2")
+
+
+#gdal - raster layers - puoi vedere le funzioni
+#o anche su https://gis.stackexchange.com/
+
+#apro il file di interesse
+raster = gdal.Open("Montecristo.tif")
+print(raster)
+
+#estraggo il metadato
+metadata = raster.GetMetadata()
+print(metadata)
+
+#estraggo la proiezione attraverso la funzione GetProjection
+projection = raster.GetProjection()
+print(projection)
+#type projection str 
+
+#Per passare da delle coord. cartografiche a coord. in px:
+#transform --> coordinate in alto a sx dell'immagine!! primo=x, secondo= valore px in gradi, quarto=y)
+transform = raster.GetGeoTransform()
+print(transform)
+
+
+#se vogliamo sapere le misure di x e y in un raster
+x = raster.RasterXSize
+y = raster.RasterYSize
+print(x,y)
+
+
+
+
+#per lavorare con le bande/singoli px del raster 
+#in particolare prendiamo una banda
+banda = raster.GetRasterBand(1)
+print(banda)
+
+#raster bandato lo trasformo in un array/una matrice in cui ogni valore della amtrice corrisponde ad un DB(digital numbers)
+banda_array = banda.ReadAsArray()
+print(banda_array)
+
+#ci mostra i punti solo degli angoli
+#si può utilizzare pure la selezione, ma siccome è una matrice x/y devo mettere due valori ex [150][64], dove il primo è la x e la seconda è la y
+#limiti puoi vedere su informazione raster weight height 
+print(banda_array[50][64])
+
+#operiamo su queste bande- primo ex somma a tutti i valori 100
+somma = banda_array +100
+print(somma)
+
+#con questi calcoli non si va a modificare il file, in quanto l'abbiamo aperto su una variabile "virtuale"
+
+
+
+#come riproiettare il nostro file/cambiare il SR
+#https://gis.stackexchange.com/ sse cerchi wrap puoi leggere riguardo questa funzione
+#creo file output - raster è il file in input - e poi sr di interesse
+output ='montecristo_reprojected.tif'
+'''
+gdal.Warp(output, raster, dstSRS='EPSG:32632')
+''' # ...in quanto ho già creato
+# è cambiata anche l'unità di misura di coordinate e pixel (in «Proprietà»)
+
+#stesso procedimento precedente
+raster32632 =gdal.Open(output)
+proj = raster32632.GetProjection()
+print(proj)
+trans = raster32632.GetGeoTransform()
+print(trans)
+
+#altro comando utile --> gdal translate - trasforma il formato di un file
+#se devi trasformare un gran numero di file
+#altrimenti guarda GCPs -- list of GCPs che georeferenzia un raster, inserendo n°righe e n°colonne...inserisci coordinate punto 
+#utilizzato insieme ad output SRS
+
+#sempre dalla pagina precedente dalla funzione translate
+#nodataValue - crea un nuovo file senz ai valori no data
+no_data_output= 'montecristo_no_data.tif'
+gdal.Translate(no_data_output, raster32632, noData= '0')
+
+
+#immagine sentinel multispettrale, 4 bande (non sono tutte) G B R NIR(in acqua molto basso, terra molto alto)
+
+
+
+
+#close dataset
+raster =None
+
