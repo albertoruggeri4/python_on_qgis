@@ -7,8 +7,11 @@ os.chdir ("D:/LAB2")
 sentinel = gdal.Open('montecristo_sentinel.tif')
 #banda n3 è il rosso banda n4 NIR, apro come prima con get 
 
+#estraggo la banda rossa(3) e la NIR(4)
 banda_red = sentinel.GetRasterBand(3)
 banda_nir = sentinel.GetRasterBand(4)
+
+#andiamo a leggere le bande come un array
 banda_red_arr = banda_red.ReadAsArray()
 banda_nir_arr = banda_nir.ReadAsArray()
 print(banda_red_arr)
