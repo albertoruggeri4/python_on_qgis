@@ -1,0 +1,52 @@
+# importo le librerie che mi servono
+import gdal
+import numpy as np #in questo modo la libreria numpy la possiamo chiamare come np
+import os
+
+
+#definiamo la work directory
+os.chdir('D:/LAB2')
+
+#effettuiamo lo stesso procedimento visto precedentemente
+#Apriamo il file tif - otteniamo la proiezione - trasforma il SR
+raster = gdal.Open('montecristo_sentinel.tif') 
+proj = raster.GetProjection()  
+trans = raster.GetGeoTransform()
+#estraggo le dimensioni di x e y - Raster..Size
+x = raster.RasterXSize 
+y = raster.RasterYSize
+
+#estraggo la banda rossa (3) e la NIR(4)
+band_red = raster.GetRasterBand(3) 
+band_nir = raster.GetRasterBand(4)
+
+#andiamo a leggere le bande come un array con i file di di tipo FLOAT32
+band_red_arr = band_red.ReadAsArray().astype(np.float32)
+band_nir_arr = band_nir.ReadAsArray().astype(np.float32) 
+
+#scriviamo la formula dell'NDVI
+NDVI = (band_nir_arr - band_red_arr) / (band_nir_arr + band_red_arr) # eseguo il calcolo dell'indice NDVI tra gli array
+
+#ora creo il nuovo raster e scrivo l'array NDVI ottenuto dal calcolo precedente
+driver = gdal.GetDriverByName('GTiff') # creo il driver
+#funzione Create per il nuovo raster
+ndvi_raster = driver.Create ('montecristo_ndvi.tif', x, y, 1, gdal.GDT_Float32) #partendo dal driver creo il nuovo file tif con dimensioni uguali a quello di partenza, 1 banda(NDVI) e dati di tipo float32 bit 
+
+#andiamo ad impostare la proiezione e la geotrasform con la funzione ...Set...
+#stessa proj e geotransform del raster
+ndvi_raster.SetProjection(proj) 
+ndvi_raster.SetGeoTransform(trans)
+
+# estraggo la banda 1 del nuovo raster creato, al momento vuoto. Da riempire
+band_ndvi = ndvi_raster.GetRasterBand(1) 
+
+# scrivo all'interno attraverso la funzione .WriteArray l'NDVI nella banda 1 del nuovo raster
+band_ndvi.WriteArray(NDVI)
+
+#chiudo e salvo i due raster
+raster = None
+ndvi_raster = None
+
+# Una volta caricato il nuovo file «montecristo_NDVI» gli cambio la colorazione:
+# «Proprietà --> «Banda singola a falso colore» --> «Viridis»
+#Per avere una restituzione che permetta un'analisi immediata del raster
