@@ -1,0 +1,73 @@
+#https://pcjericks.github.io/py-gdalogr-cookbook/vector_layers.html#create-a-new-shapefile-and-add-data
+
+import gdal,ogr, osr
+#ogr per lavorare sui layer, osr per i SR.
+
+import os
+import csv 
+
+
+os.chdir("D:/LAB2/shapefile")
+
+#come per il raster dobbiamo utilizzare un driver 
+driver = ogr.GetDriverByName('ESRI shapefile')
+
+#apro il file questa volta con la funzione CreateDataSource
+shapefile = driver.CreateDataSource('punti_quotati.shp')
+
+
+#open csv che ci servirà per le features (se vedi ?? nei sugg è perchè non hai importato il modulo)
+csvfile = open('coordinate_punti.csv')
+reader = csv.DictReader(csvfile, delimiter = ',')
+# si può fare in un'unica riga:
+# reader = csv.DictReader(open("coordinate_header.csv",delimiter = ',')
+
+
+#create the spatial reference, uso osr --> SR 
+SR =osr.SpatialReference() #creato 
+SR.ImportFromEPSG(32632) #assegnato al csv
+#SR impostiamo uguale ai nostri raster in UTM
+
+#Creare il layer - (name, SR, tipologia shape(puntuale, lineare, poligonale)) wkb=wellknowbase
+layer =shapefile.CreateLayer('punti_quotati', SR, ogr.wkbPoint)
+ 
+ 
+# Aggiungiamo i campi dello shp a cui siamo interessati...ogr per creare un campo esterno che poi inserisco in layer  
+name_field = ogr.FieldDefn('ID', ogr.OFTString)
+name_field.SetWidth(24)
+layer.CreateField(name_field) 
+#infine lo inserisco nel layer 
+#volendo si può fare in una sola riga 
+#EX. layer.CreateField(ogr.FieldDefn("Latitude", ogr.OFTReal))
+
+name_field1 = ogr.FieldDefn('xcord', ogr.OFTReal)
+layer.CreateField(name_field1)
+layer.CreateField(ogr.FieldDefn("ycoord", ogr.OFTReal))
+layer.CreateField(ogr.FieldDefn("altitudine", ogr.OFTInteger))
+
+#creare le features di ogni riga
+for row in reader: # per ogni riga del csv fai i seguenti comandi:
+    layer_defn = layer.GetLayerDefn() # estraggo la definizione del layer
+    feature = ogr.Feature(layer_defn) # definisco la feature all'interno della definizione dal layer
+    feature.SetField('ID', row['id']) # imposto il valore della feature nel primo campo della tabella attributi
+    feature.SetField('xcoord', row['xcoord']) # imposto il valore della feature nel secondo campo della tabella attributi
+    feature.SetField('ycoord', row['ycoord']) # imposto il valore della feature nel terzo campo della tabella attributi
+    feature.SetField('Altitudine', row['height']) # imposto il valore della feature nel quarto campo della tabella attributi
+    
+    #create the WKT for the feature using Py string formatting
+    wkt = "POINT(%f %f)"%  (float(row['xcoord']), float(row['ycoord'])) # scrivo la geometria in linguaggio wkt
+    print(wkt)
+    #point - %f %f --- inserisce in float le coordinate 
+    
+    wkt_new = 'POINT(' + str(row['xcoord']) + ' ' + str(row['ycoord']) +')' # altro modo (forse di più facile lettura ma più complesso da utilizzare) di scrivere la geometria in wkt
+    
+    #create the point from the Well know Txt
+    point = ogr.CreateGeometryFromWkt(wkt_new)
+    print(point)
+    feature.SetGeometry(point)
+    
+    
+    layer.CreateFeature(feature)
+    feature = None 
+    
+shapefile = None
