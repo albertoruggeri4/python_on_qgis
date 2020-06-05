@@ -1,0 +1,42 @@
+import csv
+#mettere in comunicazione la shell di py con il os -- os.chdir
+import os
+
+os.getcwd()
+os.chdir('D:\LAB2')
+
+
+
+csvfile = open ('coordinate_punti.csv','r')
+coordinate = csv.reader(csvfile,delimiter =',')
+
+'''
+for row in coordinate:
+    elips = int(row[3]) + 47
+    print(elips)
+
+'''
+lista =[]
+for row in coordinate:
+    try:
+        elips = int(row[3]) + 47
+        row.append(elips)
+        #print(row)
+        lista.append(row)
+    except:
+        pass #o print(errore)
+
+print(lista)
+
+#vado a scrivere questo nel mio file
+
+header = ['id','xcoord','ycoord','geo_height','elips_height']
+
+new_csv = open ('coordinate_punti_elips.csv','w')
+writer = csv.writer(new_csv, delimiter =',')
+
+writer.writerow(header)
+writer.writerows(lista)
+
+csvfile.close()
+new_csv.close()
