@@ -1,0 +1,35 @@
+# importo le librerie che mi servono
+import gdal
+import numpy as np
+import os
+
+os.chdir('D:/LAB2') #definisco la cartella di lavoro
+
+def raster_calc_ndvi (input_file, output_file):
+    raster = gdal.Open(input) #apro il raster
+    proj = raster.GetProjection()  #estraggo la proiezione
+    trans = raster.GetGeoTransform() #estraggo le Geo transform
+    x = raster.RasterXSize #estraggo la dimensione in pixel sull'asse x
+    y = raster.RasterYSize #estraggo la dimensione in pixel sull'asse y
+    band_red = raster.GetRasterBand(3) #estraggo la banda numero 3 (red)
+    band_nir = raster.GetRasterBand(4) #estraggo la banda numero 4 (nir)
+    band_red_arr = band_red.ReadAsArray().astype(np.float32) # leggo la banda del rosso come un array con dati di tipo float32 bit
+    band_nir_arr = band_nir.ReadAsArray().astype(np.float32) # leggo la banda del nir come un array con dati di tipo float32 bit
+    NDVI = (band_nir_arr - band_red_arr) / (band_nir_arr + band_red_arr) # eseguo il calcolo dell'indice NDVI tra gli array
+
+    #ora creo il nuovo raster e scrivo l'array NDVI ottenuto dal calcolo precedente
+    driver = gdal.GetDriverByName('GTiff') # creo il driver
+    ndvi_raster = driver.Create (output_file, x, y, 1, gdal.GDT_Float32) #partendo dal driver creo il nuovo file tif con dimensioni uguali a quello di partenza, 1 banda e dati di tipo float32 bit 
+    ndvi_raster.SetProjection(proj) # imposto la stessa proiezione del raster d'origine
+    ndvi_raster.SetGeoTransform(trans) # imposto le stesse Geo transform del raster d'origine
+    band_ndvi = ndvi_raster.GetRasterBand(1) # estraggo la banda 1 del nuovo raster creato (che in questo momento è vuota)
+    band_ndvi.WriteArray(NDVI) # scrivo l'array NDVI nella banda 1 del nuovo raster
+
+    #chiudo e salvo i due raster
+    raster = None
+    ndvi_raster = None
+
+inp = 'montecristo_sentinel.tif'
+out = 'montecristo_NDVI.tif'
+
+raster_calc_ndvi(inp,out)
