@@ -25,7 +25,7 @@ for csvfile in csvfiles:
     df = pandas.read_csv(csvfile)
     dataframes.append(df)
 
-result = pd.concat(dataframes, ignore_index=True)
+result = pandas.concat(dataframes, ignore_index=True)
 
 result.to_csv('all.csv', index=False)
 
@@ -69,7 +69,21 @@ def testing (dem, csv_file):
        lista.append(list_row)
        #print(lista) #la lista di lista
     
-   
+    
+    
+    ### CREARE ADESSO IL NUOVO FILE CSV ###
+    csv_out = open(csv_all.split('.')[0]+'_quota.csv','w')
+
+    #adesso devo definire i campi
+    fields = ['COMUNE','SHAPE_Leng','SHAPE_Area','xcoord','ycoord','quota']
+    writer = csv.writer(csv_out)
+    writer.writerow(fields)
+    writer.writerows(lista)
+
+    csvfile_read.close()
+    csv_out.close()
+    raster = None 
+
+dem = 'dem_lombardia_100m_ED32N.tif'   
 csv_all = 'all.csv'
-dem = 'dem_lombardia_100m_ED32N.tif'
 testing (dem, csv_all)
