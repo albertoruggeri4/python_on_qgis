@@ -67,4 +67,4 @@ def sample(dem, csv_file):
 #per vedere se la def funziona
 dem = 'montecristo_reprojected.tif'
 csv_file = 'punti_di_interesse.csv'
-sample(dem_file,csv_file)
+sample(dem,csv_file)
