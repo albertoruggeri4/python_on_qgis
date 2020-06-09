@@ -11,11 +11,11 @@ os.chdir("D:/LAB2/Esame")
 
 
 
-'''
-Concatenare in un unico file tutti i csv 
-stackoverflow.com/questions/53189427/how-to-open-multiple-csv-files-from-a-folder-in-python
-'''
+#Concatenare in un unico file tutti i csv 
+#stackoverflow.com/questions/53189427/how-to-open-multiple-csv-files-from-a-folder-in-python
 
+
+'''
 mycsvdir = 'csv'
 
 csvfiles = glob.glob(os.path.join(mycsvdir, '*.csv'))
@@ -28,7 +28,27 @@ for csvfile in csvfiles:
 result = pandas.concat(dataframes, ignore_index=True)
 
 result.to_csv('all.csv', index=False)
+'''
 
+######## CAMBIARE SR RASTER NEL SR DELLO SHAPE-CSV ######
+
+#apro il raster
+raster = gdal.Open("dem_lombardia_100m_ED32N.tif")
+
+
+#creo il file di output 
+output_r = 'dem_lombardia_100m_UTM_32632'
+
+#uso la funzione gdal Wrap(file output, file input, SR di interesse)
+#nel nostro caso vogliamo portare tutto al SR dello shape EPSG: 32632
+gdal.Warp(output_r, raster, dstSRS = 'EPSG:32632')
+
+
+
+
+##########
+
+#### AGGIUNGERE LA QUOTA NEI FILE CSV DAL RASTER#####
 
 def testing (dem, csv_file):
    csvfile_read = open(csv_all)
