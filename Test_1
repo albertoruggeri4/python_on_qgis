@@ -1,4 +1,4 @@
-#TEST 1
+#TEST 1 ---- con un unico file
 
 import gdal
 import os
@@ -7,7 +7,7 @@ import pandas
 import glob 
 
 
-os.chdir("D:/LAB2/Esame")
+os.chdir("D:/LAB2/Esame/csv")
 
 
 
@@ -15,7 +15,6 @@ os.chdir("D:/LAB2/Esame")
 #stackoverflow.com/questions/53189427/how-to-open-multiple-csv-files-from-a-folder-in-python
 
 
-'''
 mycsvdir = 'csv'
 
 csvfiles = glob.glob(os.path.join(mycsvdir, '*.csv'))
@@ -27,11 +26,12 @@ for csvfile in csvfiles:
 
 result = pandas.concat(dataframes, ignore_index=True)
 
-result.to_csv('all.csv', index=False)
-'''
+result.to_csv('all_comuni.csv', index=False)
+
 
 ######## CAMBIARE SR RASTER NEL SR DELLO SHAPE-CSV ######
 
+'''
 #apro il raster
 raster = gdal.Open("dem_lombardia_100m_ED32N.tif")
 
@@ -43,7 +43,7 @@ output_r = 'dem_lombardia_100m_UTM_32632'
 #nel nostro caso vogliamo portare tutto al SR dello shape EPSG: 32632
 gdal.Warp(output_r, raster, dstSRS = 'EPSG:32632')
 
-
+'''
 
 
 ##########
@@ -51,7 +51,7 @@ gdal.Warp(output_r, raster, dstSRS = 'EPSG:32632')
 #### AGGIUNGERE LA QUOTA NEI FILE CSV DAL RASTER#####
 
 def testing (dem, csv_file):
-   csvfile_read = open(csv_all)
+   csvfile_read = open(csv_file)
    reader = csv.DictReader(csvfile_read, delimiter=',')
    
    raster = gdal.Open(dem)
@@ -59,51 +59,54 @@ def testing (dem, csv_file):
    band = raster.GetRasterBand(1)
    arr = band.ReadAsArray()
    #print(arr)
-   
-   lista=[]
-   for row in reader:
-       
-       list_row=[]
-       
-       utm_x = float(row['xcoord'])
-       utm_y = float(row['ycoord'])
-       px = int((utm_x-gt[0])/gt[1])
-       py = int((utm_y - gt[3])/gt[5])
-       #print(utm_x, utm_y) 
-       #print(px,py)
-       
-       ### quota ###
-       quota = band.ReadAsArray(px, py, 1, 1)
-       quota_int = int(quota)
-       #print(quota)
-       
-       
-       #andiamo a creare la nuova lista
-       list_row.append(row['COMUNE'])
-       list_row.append(row['SHAPE_Leng'])
-       list_row.append(row['SHAPE_Area'])
-       list_row.append(row['xcoord'])
-       list_row.append(row['ycoord'])
-       list_row.append(quota_int)
-       
-       lista.append(list_row)
-       #print(lista) #la lista di lista
     
+    lista = []
+    for row in reader:
+        
+        list_row=[]
+        
+        utm_x = float(row['xcoord']) #float perch+è con dict reader abbiamo valori in str
+        utm_y = float(row['ycoord'])
+        px = int((utm_x-gt[0])/gt[1]) #al valore di geotrans prende il valore zero che viene sottrratto ad ogni valore del punto)
+        py = int((utm_y-gt[3])/gt[5]) #stessa identica cosa qui. Poi gli dico di darmi tutti valori come int
+        #print(utm_x,utm_y)
+        #print(px,py)
+        #da coordinate cartografiche a coordinate all'interno del nostro raster
+        #prendere il valore di coordinata definito da questi indici del raster px e py
+        
+        
+        
+        ###quota###
+        quota = band.ReadAsArray(px,py, 1, 1)#quota è uguale al valore sulla banda, letta come un array, ma con le particolarità di prendere la coord px e py e con estensione 1 e 1
+        #se avessi messo 3 e 3 avrebbe preso un gruppo di punti
+        #print(quota) #tipologia array che posso trasformare in int
+        quota_int = int(quota)
+        
+        #andiamo a creare la nuova lista
+        list_row.append(row['COMUNE'])
+        #list_row.append(row['SHAPE_Leng'])
+        #list_row.append(row['SHAPE_Area'])
+        list_row.append(row['xcoord'])
+        list_row.append(row['ycoord'])
+        list_row.append(quota_int)
+        
+        lista.append(list_row)
+        print(lista) #la lista di lista
     
-    
-    ### CREARE ADESSO IL NUOVO FILE CSV ###
-    csv_out = open(csv_all.split('.')[0]+'_quota.csv','w')
+    #### CREARE ADESSO IL NUOVO FILE CSV ###
+    csv_out = open(csv_file.split('.')[0]+'_quota.csv','w')
 
     #adesso devo definire i campi
-    fields = ['COMUNE','SHAPE_Leng','SHAPE_Area','xcoord','ycoord','quota']
+    fields = ['COMUNE', 'xcoord', 'ycoord','quota']
     writer = csv.writer(csv_out)
     writer.writerow(fields)
     writer.writerows(lista)
-
-    csvfile_read.close()
+    
     csv_out.close()
-    raster = None 
+    
+    csvfile_read.close()
+    raster = None
 
 dem = 'dem_lombardia_100m_ED32N.tif'   
-csv_all = 'all.csv'
-testing (dem, csv_all)
+csv_file = 'all_comuni.csv'
+testing (dem, csv_file)
