@@ -1,4 +1,4 @@
-#TEST 1 ---- con un unico file
+#TEST 1 ---- con tutti i comuni della lombardia in un unico file csv
 
 import gdal
 import os
@@ -14,7 +14,7 @@ os.chdir("D:/LAB2/Esame/csv")
 #Concatenare in un unico file tutti i csv 
 #stackoverflow.com/questions/53189427/how-to-open-multiple-csv-files-from-a-folder-in-python
 
-
+'''
 mycsvdir = 'csv'
 
 csvfiles = glob.glob(os.path.join(mycsvdir, '*.csv'))
@@ -27,7 +27,7 @@ for csvfile in csvfiles:
 result = pandas.concat(dataframes, ignore_index=True)
 
 result.to_csv('all_comuni.csv', index=False)
-
+'''
 
 ######## CAMBIARE SR RASTER NEL SR DELLO SHAPE-CSV ######
 
