@@ -75,7 +75,7 @@ def testing (dem, csv_file):
     csv_out = open(name, 'w')
     
     #adesso devo definire i campi
-    fields = ['COMUNE', 'xcoord', 'ycoord','quota']
+    fields = ['COD_REG', 'COD_CM', 'COD_PRO', 'PRO_COM', 'COMUNE', 'NOME_TED', 'FLAG_CM', 'SHAPE_Leng', 'SHAPE_Area', 'xcoord', 'ycoord', 'Quota']
     writer = csv.writer(csv_out)
     writer.writerow(fields)
     writer.writerows(lista)
@@ -168,4 +168,3 @@ for file in glob.glob('*csv'):
     dem='dem_lombardia_100m_ED32N.tif'  
     testing(dem, file)
     #parametri? img saranno tutti i file che finiscono in tif (type strg)
-
