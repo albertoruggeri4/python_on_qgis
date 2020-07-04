@@ -1,26 +1,40 @@
-# Interrogazione PX - MODIFICA DI TUTTI CSV IN CARTELLA - (Crash)
+#########  ESERCIZIO 1:
+'''Scrivere una UNICA funzione in cui viene interrogato il DEM andando ad aggiungere ad ogni csv il valore di quota corrispondente alle coordinate indicate,
+successivamente trasformare i csv in shapefile. Gli shapefile finali dovranno avere tutti gli attributi presenti nei csv iniziali con aggiunta la quota.
+Sarà quindi necessario ripetere il procedimento su tutti i file della cartella utilizzando il ciclo glob. 
+ATTENZIONE il DEM ha un sistema di riferimento differente da quello delle coordinate dei csv, 
+sarà quindi necessario riproiettarlo (questo lo potete fare all'esterno della funzione). '''
 
-import gdal
-import os 
-import csv
-import glob
+
+##import delle librerie utili allo svolgimento dell'esercizio
+
+import gdal       #libreria di traduttori per formati di dati geospaziali raster e vettoriali
+import os         #libreria che permette di comunicare con il sistema operativo
+import csv        #libreria per poter lavorare con i file in formato csv
+import glob       #libreria utile per poter recuperare file/percorsi
 import ogr, osr 
 
+
+## settaggio della Working Directory, ovvero la cartella di lavoro
 os.chdir("C:/LAB_2")
 
 
 
 
-####SISTEMA DI RIFERIEMNTO DEL RASTER
+######   Prima parte: CAMBIO SISTEMA DI RIFERIEMNTO DEL RASTER in WGS84    #####
 
+#caricamento dem originale attraverso la funzione gdal.Open
 dataset =gdal.Open('dem_lombardia_100m_ED32N.tif')
 
+#creazione del nome del nuovo raster
 raster_r = 'dem_lombardia_100m_WGS84_32N.tif'
+#creazione finale del raster attraverso la funzione gdal.Warp che prende come parametri (raster in uscita, raster originale, nuovo SR)
 gdal.Warp(raster_r, dataset, dstSRS = 'EPSG:32632')
 
+#chiudo il file che era stato aperto per concludere l'operazione
 dataset = None
 
-######              ###################
+######   Seconda parte:            ###################
 def testing (dem, csv_file):
     csvfile_read = open (csv_file)
     reader = csv.DictReader(csvfile_read, delimiter =',')
